@@ -223,12 +223,27 @@
           btn.disabled = true;
           toast('Thanks — our community moderation will take a look.');
         } else if (btn.dataset.action === 'delete-review') {
-          if (!confirm('Delete your review? This cannot be undone.')) return;
+          if (!(await askConfirm('Delete your review? This cannot be undone.'))) return;
           await api('DELETE', `/api/reviews/${reviewId}`);
           toast('Review deleted.');
           onChange && onChange();
         }
       } catch (err) { toast(err.message); }
+    });
+  }
+
+  /** In-page confirmation dialog (window.confirm is unavailable in some embedded frames). */
+  function askConfirm(message, okLabel = 'Confirm') {
+    return new Promise((resolve) => {
+      const dlg = document.createElement('dialog');
+      dlg.innerHTML = `
+        <form method="dialog">
+          <p class="pre" style="margin-top:0">${esc(message)}</p>
+          <div class="row" style="margin-top:16px"><button class="btn" value="ok">${esc(okLabel)}</button><button class="btn secondary" value="cancel">Cancel</button></div>
+        </form>`;
+      document.body.appendChild(dlg);
+      dlg.addEventListener('close', () => { const ok = dlg.returnValue === 'ok'; dlg.remove(); resolve(ok); });
+      dlg.showModal();
     });
   }
 
@@ -317,7 +332,7 @@
         else if (b.dataset.accept) { await POST(`/api/connections/${b.dataset.accept}/accept`); toast('Connected!'); }
         else if (b.dataset.cancel) { await api('DELETE', `/api/connections/${b.dataset.cancel}`); toast('Request withdrawn.'); }
         else if (b.dataset.remove) {
-          if (!confirm('Remove this connection?')) return;
+          if (!(await askConfirm('Remove this connection?'))) return;
           await api('DELETE', `/api/connections/${b.dataset.remove}`);
           toast('Removed.');
         }
@@ -616,7 +631,7 @@
           </div>
           <div class="field"><label class="check"><input type="checkbox" name="anonymous" checked/> Post anonymously <span class="hint">(your name won't be shown on this review)</span></label></div>
           <div class="field notice"><label class="check"><input type="checkbox" name="attest_hiring_process_only" required/> I confirm this review is only about my experience as a <b>candidate during the job search / interview process</b> — not about working at this company.</label></div>
-          <div class="row"><button class="btn" type="submit">${editing ? 'Save changes' : 'Publish review'}</button><a class="btn secondary" href="javascript:history.back()">Cancel</a></div>
+          <div class="row"><button class="btn" type="submit">${editing ? 'Save changes' : 'Publish review'}</button><button class="btn secondary" type="button" id="cancel-review">Cancel</button></div>
         </form>
         <aside class="stack">
           <div class="card">
@@ -628,6 +643,7 @@
       </div>`;
 
     const form = document.getElementById('review-form');
+    document.getElementById('cancel-review').addEventListener('click', () => history.back());
 
     // Star inputs
     function starInput(el, initial) {
@@ -710,7 +726,7 @@
       };
       if (!payload.attest_hiring_process_only) throw new Error('Please confirm your review is only about the hiring/interview process.');
       if (EMPLOYMENT_HINTS.test(`${f.title} ${f.body}`) &&
-          !confirm('Parts of your review sound like they describe working at the company. JobHub reviews are only about the hiring process — reviews about employment get reported and hidden.\n\nPublish anyway?')) return;
+          !(await askConfirm('Parts of your review sound like they describe working at the company. JobHub reviews are only about the hiring process — reviews about employment get reported and hidden.\n\nPublish anyway?'))) return;
 
       let saved;
       if (editing) {
@@ -849,14 +865,14 @@
     });
     const del = document.getElementById('del-thread');
     if (del) del.addEventListener('click', async () => {
-      if (!confirm('Delete this thread and all replies?')) return;
+      if (!(await askConfirm('Delete this thread and all replies?'))) return;
       await api('DELETE', `/api/forum/threads/${t.id}`);
       toast('Thread deleted.');
       go('#/forum');
     });
     document.getElementById('posts').addEventListener('click', async (e) => {
       const b = e.target.closest('[data-del-post]');
-      if (!b || !confirm('Delete your reply?')) return;
+      if (!b || !(await askConfirm('Delete your reply?'))) return;
       await api('DELETE', `/api/forum/posts/${b.dataset.delPost}`);
       render();
     });
@@ -1053,7 +1069,7 @@
         render();
       });
       document.getElementById('back-to-seeking').addEventListener('click', async () => {
-        if (!confirm('Switch your status back to job seeking?')) return;
+        if (!(await askConfirm('Switch your status back to job seeking?'))) return;
         setMe((await POST('/api/me/employment', { status: 'seeking' })).user);
         toast('Status updated. You’ve got this. 💪');
         render();

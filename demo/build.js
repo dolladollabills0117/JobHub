@@ -38,8 +38,8 @@ const bundle = esbuild.buildSync({
 }).outputFiles[0].text;
 
 const sqlDist = path.join(path.dirname(require.resolve('sql.js')), '..', 'dist');
-const sqlJs = fs.readFileSync(path.join(sqlDist, 'sql-wasm.js'), 'utf8');
-const wasmB64 = fs.readFileSync(path.join(sqlDist, 'sql-wasm.wasm')).toString('base64');
+// The asm.js build of SQLite is plain JavaScript, so it also runs where WebAssembly is blocked.
+const sqlJs = fs.readFileSync(path.join(sqlDist, 'sql-asm.js'), 'utf8');
 
 const css = fs.readFileSync(path.join(root, 'public', 'styles.css'), 'utf8');
 const appJs = fs.readFileSync(path.join(root, 'public', 'app.js'), 'utf8');
@@ -50,7 +50,7 @@ const banner = `
     <div class="container row between">
       <span><b>Live demo</b> — everything runs in your browser and is saved only on this device.
         Log in as <code>sam@example.com</code> / <code>password123</code> (or dev@, maya@, priya@, jordan@, alex@).</span>
-      <button class="btn sm secondary" type="button" onclick="resetJobHubDemo()">Reset demo data</button>
+      <button class="btn sm secondary" type="button" id="reset-demo">Reset demo data</button>
     </div>
   </div>`;
 const bannerCss = `
@@ -67,10 +67,25 @@ replaceOnce('<link rel="stylesheet" href="/styles.css" />', `<style>${css}${bann
 replaceOnce('<header class="topbar">', `${banner}\n  <header class="topbar">`);
 replaceOnce(
   '<script src="/app.js"></script>',
-  [inline(sqlJs), `<script>window.__SQL_WASM_B64=${JSON.stringify(wasmB64)};</script>`, inline(bundle), inline(appJs)].join('\n')
+  [inline(sqlJs), inline(bundle), inline(appJs)].join('\n')
 );
 
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'index.html'), html);
 fs.writeFileSync(path.join(outDir, '.nojekyll'), '');
+// Variant without the document skeleton, for hosts that supply their own <html>/<head>/<body>.
+const stripSkeleton = (part) =>
+  part
+    .replace(/<!doctype html>\s*/i, '')
+    .replace(/<\/?html[^>]*>\s*/gi, '')
+    .replace(/<\/?head>\s*/gi, '')
+    .replace(/<\/?body>\s*/gi, '')
+    .replace(/<meta charset="utf-8" \/>\s*/i, '')
+    .replace(/<meta name="viewport"[^>]*>\s*/i, '');
+// Only touch the markup around the inlined scripts, never the scripts themselves.
+const firstScript = html.indexOf('<script>');
+const afterLastScript = html.lastIndexOf('</script>') + '</script>'.length;
+const fragment =
+  stripSkeleton(html.slice(0, firstScript)) + html.slice(firstScript, afterLastScript) + stripSkeleton(html.slice(afterLastScript));
+fs.writeFileSync(path.join(outDir, 'embed.html'), fragment);
 console.log(`Built ${path.relative(root, path.join(outDir, 'index.html'))} (${(html.length / 1024).toFixed(0)} KB)`);

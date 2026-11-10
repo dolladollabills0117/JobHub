@@ -34,7 +34,7 @@ function fromBase64(b64) {
 let token = store.get(TOKEN_KEY);
 
 const ready = (async () => {
-  const SQL = await window.initSqlJs({ wasmBinary: fromBase64(window.__SQL_WASM_B64).buffer });
+  const SQL = await window.initSqlJs();
   let saved = null;
   const raw = store.get(DB_KEY);
   if (raw) {
@@ -86,6 +86,9 @@ window.fetch = async (input, init = {}) => {
     headers: { 'content-type': 'application/json' },
   });
 };
+
+const resetButton = document.getElementById('reset-demo');
+if (resetButton) resetButton.addEventListener('click', () => window.resetJobHubDemo());
 
 window.resetJobHubDemo = () => {
   store.remove(DB_KEY);
