@@ -8,7 +8,8 @@
     "start": "node --disable-warning=ExperimentalWarning server/index.js",
     "dev": "node --disable-warning=ExperimentalWarning --watch server/index.js",
     "seed": "node --disable-warning=ExperimentalWarning server/seed.js",
-    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js",
+    "build:demo": "node demo/build.js"
   },
   "engines": {
     "node": ">=22.13"
@@ -16,5 +17,9 @@
   "license": "MIT",
   "dependencies": {
     "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "sql.js": "^1.15.2"
   }
 }

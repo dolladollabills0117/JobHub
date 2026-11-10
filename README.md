@@ -36,6 +36,12 @@ npm start         # http://localhost:3000
 | `npm run seed` | Add demo data to an empty database (`-- --reset` to wipe first) |
 | `npm test` | Run the API test suite (in-memory database) |
 
+### Browser-only demo (GitHub Pages)
+
+`npm run build:demo` builds `dist/demo/index.html`: one self-contained page that runs the real API code in the browser on SQLite compiled to WebAssembly ([sql.js](https://github.com/sql-js/sql.js)), preloaded with the demo data. No server is needed. Each visitor's data is saved only in their own browser (there's a "Reset demo data" button). To see the connection notification, log in as `sam@example.com`, mark yourself employed, log out, then log in as `dev@example.com`.
+
+`.github/workflows/pages.yml` runs the tests, builds the demo and deploys it to GitHub Pages. One-time setup: in the repo go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**. The site will then be at `https://<owner>.github.io/<repo>/`.
+
 Environment variables: `PORT`; `DB_PATH` (default `data/jobhub.db`); `NODE_ENV=production` (makes the session cookie `Secure`).
 
 ## Project layout
@@ -48,8 +54,9 @@ server/
   auth.js        password hashing (scrypt) + cookie sessions
   constants.js   stages, outcomes, rating dimensions, forum categories (served via /api/meta)
   validate.js    input validation helpers
-  seed.js        demo data
+  seed.js        CLI for demo data (data itself in demo-data.js)
 public/          single-page frontend (vanilla JS, hash routing, no build step)
+demo/            browser-only build (Express / node:sqlite shims + esbuild script)
 test/            node:test API tests
 ```
 
