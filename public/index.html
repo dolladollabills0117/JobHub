@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JobHub — Rate the hiring process</title>
+  <meta name="description" content="Job seekers rate employers, recruiters and hiring managers on how they run their hiring process. Plus a forum to network, swap tips and vent." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>J</text></svg>" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="#/" class="brand"><span class="logo">J</span><span>JobHub</span></a>
+      <button class="menu-toggle" aria-label="Menu" aria-expanded="false">☰</button>
+      <nav class="nav" id="nav">
+        <a href="#/companies" data-nav="companies">Companies</a>
+        <a href="#/forum" data-nav="forum">Forum</a>
+        <a href="#/members" data-nav="members">Members</a>
+        <span class="nav-spacer"></span>
+        <span id="nav-user"></span>
+      </nav>
+    </div>
+  </header>
+  <main id="app" class="container" tabindex="-1"></main>
+  <footer class="footer">
+    <div class="container">
+      <strong>JobHub</strong> — rate the hiring process, not the job. Reviews cover candidate experience only:
+      how employers, recruiters and hiring managers treat people while they're job hunting.
+    </div>
+  </footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

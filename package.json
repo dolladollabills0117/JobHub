@@ -1,0 +1,20 @@
+{
+  "name": "jobhub",
+  "version": "1.0.0",
+  "description": "Rate the hiring process, not the job. Reviews of employers, recruiters and hiring managers from job seekers, plus a community forum.",
+  "main": "server/index.js",
+  "private": true,
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server/index.js",
+    "seed": "node --disable-warning=ExperimentalWarning server/seed.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
